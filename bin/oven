@@ -1,0 +1,87 @@
+#!/bin/bash
+
+# oven - master server script for bakeware
+
+oven_dir=/opt/oven
+script_dir=$oven_dir/lib
+status_file=_bake/bake.status
+
+function status {
+    if [ ! -d $status_file_dir ]; then
+      echo "noproj - project not on server (try bake push?)"
+      exit 1
+    fi
+    if [ ! -f $status_file ]; then
+      echo "nostatus - project directory exists but bake not started"
+      exit 1
+    fi
+    cat $status_file
+}
+
+function build {
+    sdk_target="sdk"
+    sdk_build_env_target="env"
+    project_target="all"
+    project_make="make -f $script_dir/project.mk"
+    sdk_make="make -f $script_dir/sdk.mk"
+    export TERM="xterm-256color"
+    export OVEN="$oven_dir"
+    mkdir -p "_bake"
+    echo "building sdk" | tee $status_file
+    echo invoking sdk build
+    $sdk_make $sdk_target
+    if [ $? -eq 0 ]
+    then
+      echo "building application" | tee $status_file
+      bash -c "source `$sdk_make $sdk_build_env_target` && $project_make all"
+      if [ $? -eq 0 ]
+      then
+        echo "completed build" | tee $status_file
+      else
+        echo "error $? building application" | tee $status_file
+      fi
+    else
+      echo "error $? building sdk" | tee $status_file
+    fi
+    # done, so killoff anything to do with this build project, which will 
+    # remove things that are watching it, for instance
+    ##pkill -f $1
+}
+
+# main swtich statement
+
+case "$1" in
+    "") 
+        echo "$0 takes at least one command as an argument"
+        exit 1
+        ;;
+    "clean")
+        echo "cleaning project directory"
+        rm -rf *
+        exit 0
+        ;;
+    "status")
+        status
+        exit 0
+        ;;
+    "start")
+        echo "starting build"
+        mkdir -p _bake
+        build >_bake/bake.log 2>&1 &
+        echo "build started"
+        exit 0
+        ;;
+    "peek")
+        tail -30 _bake/bake.log
+        exit 0
+        ;;
+    "watch")
+        tail -f _bake/bake.log
+        exit 0
+        ;;
+    *)
+        echo "unimplemented command: $1"
+        exit 1
+        ;;    
+esac
+

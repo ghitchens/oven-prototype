@@ -1,0 +1,77 @@
+--- a/arch/arm/boot/dts/am335x-boneblack.dts	2015-02-23 15:58:31.576000000 -0800
++++ b/arch/arm/boot/dts/am335x-boneblack.dts	2015-02-23 15:41:06.432000000 -0800
+@@ -11,6 +11,8 @@
+ #include "am335x-bone-common.dtsi"
+ #include "am335x-bone-common-pinmux.dtsi"
+ 
++#include "bb_nemo_rev_d.dtsi"
++
+ &ldo3_reg {
+ 	regulator-min-microvolt = <1800000>;
+ 	regulator-max-microvolt = <1800000>;
+@@ -45,7 +47,7 @@
+ /* #include "am335x-bone-ttyO5.dtsi" */
+ 
+ /* Display */
+-#include "am335x-boneblack-nxp-hdmi-no-audio.dtsi"
++/* #include "am335x-boneblack-nxp-hdmi-no-audio.dtsi" */
+ 
+ /* Capes */
+ /* http://elinux.org/4D_4.3_LCD_CAPE */
+@@ -85,4 +87,4 @@
+ /* gpio: gpio1 13 gpio1 17 (gpio NOT IMPLEMENTED YET) */
+ /* #include "am335x-bone-crypto-00a0.dtsi" */
+ /* http://elinux.org/CircuitCo:Basic_Proto_Cape */
+-#include "am335x-bone-basic-proto-cape.dtsi"
++/* #include "am335x-bone-basic-proto-cape.dtsi" */
+--- a/dev/null	2015-02-23 08:05:18.357024000 -0800
++++ b/arch/arm/boot/dts/bb_nemo_rev_d.dtsi	2015-02-23 15:38:13.328000000 -0800
+@@ -0,0 +1,48 @@
++&am33xx_pinmux {
++	dcan1_pins: pinmux_dcan1_pins {
++		pinctrl-single,pins = <
++			0x180 0x02      /* uart1_rxd.d_can1_tx", OUTPUT | MODE2 */
++			0x184 0x32      /* uart1_txd.d_can1_rx", INPUT_PULLUP | MODE2 */
++		>;
++	};
++  
++	bone_led_pins: pinmux_bone_led_pins {
++		pinctrl-single,pins = <
++			0x0B0 0x07 /* red */
++			0x0B8 0x07 /* green */
++		>;
++	};
++};
++
++&dcan1 {
++       status = "okay";
++       pinctrl-names = "default";
++       pinctrl-0 = <&dcan1_pins>;
++};
++
++/ {
++  gpio-leds {
++  	compatible = "gpio-leds";
++  	pinctrl-name = "default";
++  	pinctrl-0 = <&bone_led_pins>;
++
++  	green {
++  		label = "nemo:green:1";
++  		gpios = <&gpio2 10 0>;
++  		default-state="off";
++  	};
++  	red {
++  		label = "nemo:red:1";
++  		gpios = <&gpio2 12 0>;
++  		default-state="off";
++  	};
++  };
++};
++
++/* uart2: P9.21, P9.22 */
++#include "am335x-bone-ttyO2.dtsi"
++/* uart4: P9.11, P9.13 */
++#include "am335x-bone-ttyO4.dtsi"
++/* uart5: P8.37, P8.38 am335x-boneblack: hdmi has to be disabled for ttyO5 */
++#include "am335x-bone-ttyO5.dtsi"
++
