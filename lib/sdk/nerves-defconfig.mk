@@ -1,9 +1,3 @@
-# nerves.mk 	bakeware.io makefile for Frank Hunleth's "Nerves" SDK
-#
-# sdk_type		should always be "nerves" for now
-# sdk_config	type of configuration for nerves
-#
-
 sdk = ~/sdks/$(sdk_type)/$(sdk_config)
 sdk_repo = https://github.com/nerves-project/nerves-sdk.git
 
@@ -14,7 +8,7 @@ $(sdk)/.stamp_cloned:
 	touch $(sdk)/.stamp_cloned
 	
 $(sdk)/.stamp_configured: $(sdk)/.stamp_cloned
-	make -C $(sdk) $(sdk_config)_defconfig
+	make -C $(sdk) $(sdk_config)
 	touch $(sdk)/.stamp_configured
 
 $(sdk)/.stamp_built: $(sdk)/.stamp_configured

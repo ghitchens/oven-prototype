@@ -3,6 +3,7 @@
 # oven - master server script for bakeware
 
 oven_dir=/opt/oven
+oven_sdks=/var/opt/oven/sdks
 script_dir=$oven_dir/lib
 status_file=_bake/bake.status
 
@@ -24,8 +25,11 @@ function build {
     project_target="all"
     project_make="make -f $script_dir/project.mk"
     sdk_make="make -f $script_dir/sdk.mk"
+
     export TERM="xterm-256color"
     export OVEN="$oven_dir"
+    export OVEN_SDKS="$oven_sdks"
+
     mkdir -p "_bake"
     echo "building sdk" | tee $status_file
     echo invoking sdk build

@@ -1,5 +1,8 @@
 ELIXIR_APP_NAME = $(project_id)
 
+hex = ~/.mix/archives/hex.ez
+rebar = ~/.mix/rebar
+
 ifeq ($(NERVES_ROOT),)
     $(error Make sure that you source nerves-env.sh first)
 endif
@@ -20,7 +23,7 @@ release: rel/nerves_system_libs compile
 	mix release
 	$(REL2FW) rel/$(ELIXIR_APP_NAME) $(ELIXIR_APP_NAME).fw $(ELIXIR_APP_NAME).img
 
-compile: rel/nerves_system_libs
+compile: $(hex) $(rebar) rel/nerves_system_libs
 	@echo "compiling"
 	mix deps.get
 	mix compile
@@ -34,6 +37,14 @@ rel/vm.args rel/relx.config:
 rel/nerves_system_libs: rel/vm.args rel/relx.config
 	@echo "creating link to erlang system libs"
 	ln -sfT $(ERL_LIB) $@
+
+$(hex):
+	@echo "no local hex found -- installing hex"
+	mix local.hex --force
+
+$(rebar):
+	@echo "no local rebar found -- installing rebar"
+	mix local.rebar --force
 
 clean: fwclean
 	mix clean; rm -fr _build _images rel/$(ELIXIR_APP_NAME)
